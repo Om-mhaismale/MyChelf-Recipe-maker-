@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyChelf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>MyChelf</h1>
+        <input type="text" id="search-box" placeholder="Enter a recipe name or ingredient">
+        <button onclick="searchRecipe()">Search</button>
+        
+        <div class="grid-container" id="results"></div> <!-- Grid container for recipes -->
+    </div>
+
+    <script>
+        function searchRecipe() {
+            let query = document.getElementById("search-box").value;
+            fetch(`/search?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    let resultsDiv = document.getElementById("results");
+                    resultsDiv.innerHTML = ""; // Clear previous results
+
+                    if (data.recipes) {
+                        data.recipes.forEach(recipe => {
+                            resultsDiv.innerHTML += `
+                                <div class="recipe-card">
+                                    <img src="${recipe.image_url}" alt="Recipe Image">
+                                    <h3>${recipe.name}</h3>
+                                    <p><strong>Ingredients:</strong> ${recipe.ingredients}</p>
+                                    <p><strong>Cuisine:</strong> ${recipe.cuisine}</p>
+                                    <a href="${recipe.url}" target="_blank">View Recipe</a>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        resultsDiv.innerHTML = `<p>No recipes found.</p>`;
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
