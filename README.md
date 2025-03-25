@@ -50,6 +50,7 @@ Once you have completed these steps successfully, you can access MyChelf by navi
 - **Python**
 - **Flask**
 - **Flask-SQLAlchemy**
+- **Jinja2**
 - **HTML/CSS**
 - **JavaScript**
 
