@@ -1,39 +1,64 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    background-color: #f4f4f4;
+    background: linear-gradient(to right, #ff9a9e, #ff9a9e);
+    margin: 0;
+    padding: 0;
+}
+.placeholder-image {
+    display: block;
+    margin: 20px auto;
+    max-width: 50%;
+}
+
+header {
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    width: 100%;
 }
 
 .container {
-    margin-top: 50px;
+    margin: 20px auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 1200px; /* Limits max width but keeps it responsive */
 }
 
 input {
     padding: 10px;
     width: 300px;
     margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
 button {
     padding: 10px;
-    background-color: #28a745;
+    background-color: rgba(114, 58, 58, 0.7);
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 5px;
 }
 
 button:hover {
-    background-color: #218838;
+    background-color: rgba(0, 0, 0, 0.7);
 }
 
+/* FULL-WIDTH GRID FIX */
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
     padding: 20px;
     justify-items: center;
+    width: 100%;
 }
 
+/* RECIPE CARD STYLES */
 .recipe-card {
     background: white;
     padding: 15px;
@@ -42,6 +67,7 @@ button:hover {
     text-align: left;
     width: 100%;
     max-width: 300px;
+    overflow: hidden;
 }
 
 .recipe-card img {
@@ -55,6 +81,19 @@ button:hover {
     margin: 10px 0;
 }
 
+/* Prevents text overflow */
+.recipe-card p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* FIX FOR INGREDIENTS OVERFLOW */
+.recipe-card p strong {
+    display: block;
+    font-weight: bold;
+}
+
+/* BUTTON STYLE */
 .recipe-card a {
     display: inline-block;
     padding: 5px 10px;
@@ -66,4 +105,22 @@ button:hover {
 
 .recipe-card a:hover {
     background-color: #0056b3;
+}
+
+/* CENTERED "MORE" BUTTON */
+#load-more {
+    display: flex;
+    margin: 20px auto;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #ff6600;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    justify-content: center;
+}
+
+#load-more:hover {
+    background-color: #cc5200;
 }

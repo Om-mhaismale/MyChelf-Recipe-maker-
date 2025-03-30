@@ -7,23 +7,49 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <!-- Stylish Header -->
+    <header>
+        <h1>MyChelf 🍽️</h1>
+        <p>Are you cooked?, Let's cook!</p>
+    </header>
+
     <div class="container">
-        <h1>MyChelf</h1>
-        <input type="text" id="search-box" placeholder="Enter a recipe name or ingredient">
+        <input type="text" id="search-box" placeholder="Enter an ingredient or recipe name">
         <button onclick="searchRecipe()">Search</button>
-        
-        <div class="grid-container" id="results"></div> <!-- Grid container for recipes -->
+
+        <!-- Placeholder Image -->
+        <img id="placeholder-image" class="placeholder-image" src="{{ url_for('static', filename='recipe_image.png') }}" alt="Placeholder Image">
+
+        <!-- Recipe Grid -->
+        <div class="grid-container" id="results"></div>
+
+        <!-- Load More Button -->
+        <button id="load-more" onclick="loadMore()" style="display: none;">More Recipes</button>
     </div>
 
     <script>
+        let query = "";
+        let offset = 0; // Track how many results have been loaded
+        const limit = 10; // Number of recipes per request
+
         function searchRecipe() {
-            let query = document.getElementById("search-box").value;
-            fetch(`/search?query=${query}`)
+            query = document.getElementById("search-box").value;
+            offset = 0;
+            document.getElementById("results").innerHTML = "";
+            fetchRecipes();
+
+            // Hide the placeholder image when searching
+            const placeholderImage = document.getElementById("placeholder-image");
+            if (placeholderImage) {
+                placeholderImage.style.display = "none";
+            }
+        }
+
+        function fetchRecipes() {
+            fetch(`/search?query=${query}&offset=${offset}&limit=${limit}`)
                 .then(response => response.json())
                 .then(data => {
                     let resultsDiv = document.getElementById("results");
-                    resultsDiv.innerHTML = ""; // Clear previous results
-
                     if (data.recipes) {
                         data.recipes.forEach(recipe => {
                             resultsDiv.innerHTML += `
@@ -36,10 +62,16 @@
                                 </div>
                             `;
                         });
-                    } else {
+                        offset += limit;
+                        document.getElementById("load-more").style.display = "block";
+                    } else if (offset === 0) {
                         resultsDiv.innerHTML = `<p>No recipes found.</p>`;
                     }
                 });
+        }
+
+        function loadMore() {
+            fetchRecipes();
         }
     </script>
 </body>
