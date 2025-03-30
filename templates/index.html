@@ -10,7 +10,6 @@
     <!-- Stylish Header -->
     <header>
         <h1>MyChelf 🍽️</h1>
-        <p>Are you cooked?, Let's cook!</p>
     </header>
 
     <div class="container">
@@ -50,7 +49,9 @@
                 .then(response => response.json())
                 .then(data => {
                     let resultsDiv = document.getElementById("results");
-                    if (data.recipes) {
+                    const loadMoreButton = document.getElementById("load-more");
+
+                    if (data.recipes && data.recipes.length > 0) {
                         data.recipes.forEach(recipe => {
                             resultsDiv.innerHTML += `
                                 <div class="recipe-card">
@@ -63,9 +64,12 @@
                             `;
                         });
                         offset += limit;
-                        document.getElementById("load-more").style.display = "block";
-                    } else if (offset === 0) {
-                        resultsDiv.innerHTML = `<p>No recipes found.</p>`;
+                        loadMoreButton.style.display = "block"; // Show the button if recipes are found
+                    } else {
+                        if (offset === 0) {
+                            resultsDiv.innerHTML = `<img id="no-recipe" class="no-recipe" src="{{ url_for('static', filename='no_recipes.png') }}" alt="No Recipes Found">`;
+                        }
+                        loadMoreButton.style.display = "none"; // Hide the button if no recipes are found
                     }
                 });
         }
