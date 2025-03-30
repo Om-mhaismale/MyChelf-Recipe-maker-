@@ -61,3 +61,7 @@ Contributions are welcome! If you'd like to contribute to MyChelf, please fork t
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+additions:
+
+pip install flask-migrate
