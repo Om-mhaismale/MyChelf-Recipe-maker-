@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyChelf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
+</head>
+<body>
+    <!-- Stylish Header -->
+    <header>
+        <h1>MyChelf 🍽️</h1>
+    </header>
+
+    <div class="container">
+        <input type="text" id="search-box" placeholder="Enter an ingredient or recipe name">
+        <button onclick="searchRecipe()">Search</button>
+
+        <!-- Placeholder Image -->
+        <img id="placeholder-image" class="placeholder-image" src="{{ url_for('static', filename='recipe_image-removebg-preview.png') }}" alt="Placeholder Image">
+
+        <!-- Recipe Grid -->
+        <div class="grid-container" id="results"></div>
+
+        <!-- Load More Button -->
+        <button id="load-more" onclick="loadMore()" style="display: none;">More Recipes</button>
+    </div>
+
+    <script>
+        let query = "";
+        let offset = 0; // Track how many results have been loaded
+        const limit = 10; // Number of recipes per request
+
+        function searchRecipe() {
+            query = document.getElementById("search-box").value;
+            offset = 0;
+            document.getElementById("results").innerHTML = "";
+            fetchRecipes();
+
+            // Hide the placeholder image when searching
+            const placeholderImage = document.getElementById("placeholder-image");
+            if (placeholderImage) {
+                placeholderImage.style.display = "none";
+            }
+        }
+
+        function fetchRecipes() {
+            fetch(`/search?query=${query}&offset=${offset}&limit=${limit}`)
+                .then(response => response.json())
+                .then(data => {
+                    let resultsDiv = document.getElementById("results");
+                    const loadMoreButton = document.getElementById("load-more");
+
+                    if (data.recipes && data.recipes.length > 0) {
+                        data.recipes.forEach(recipe => {
+                            resultsDiv.innerHTML += `
+                                <div class="recipe-card">
+                                    <img src="${recipe.image_url}" alt="Recipe Image">
+                                    <h3>${recipe.name}</h3>
+                                    <p><strong>Ingredients:</strong> ${recipe.ingredients}</p>
+                                    <p><strong>Cuisine:</strong> ${recipe.cuisine}</p>
+                                    <a href="${recipe.url}" target="_blank">View Recipe</a>
+                                </div>
+                            `;
+                        });
+                        offset += limit;
+                        loadMoreButton.style.display = "block"; // Show the button if recipes are found
+                    } else {
+                        if (offset === 0) {
+                            resultsDiv.innerHTML = `<img id="no-recipe" class="no-recipe" src="{{ url_for('static', filename='no_recipes_olive.png') }}" alt="No Recipes Found">`;
+                        }
+                        loadMoreButton.style.display = "none"; // Hide the button if no recipes are found
+                    }
+                });
+        }
+
+        function loadMore() {
+            fetchRecipes();
+        }
+    </script>
+</body>
+</html>
