@@ -5,7 +5,7 @@ import pandas as pd
 db_config = {
     'host': 'localhost',  
     'user': 'root',
-    'password': '1234',
+    'password': 'IllidanMagma44!',
     'database': 'recipe_db'
 }
 
@@ -18,8 +18,8 @@ for _, row in df.iterrows():
     cursor.execute("""
         INSERT INTO recipes 
         (TranslatedRecipeName, TranslatedIngredients, TotalTimeInMins, Cuisine, 
-         TranslatedInstructions, URL, Cleaned_Ingredients, image_url, Ingredient_count, Hero_Ing) 
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s,%s)
+         TranslatedInstructions, URL, Cleaned_Ingredients, image_url, Ingredient_count, Hero_Ing, Veg_Nonveg) 
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s,%s, %s)
     """, tuple(row))
 
 conn.commit()
