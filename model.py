@@ -16,4 +16,4 @@ class Recipe(db.Model):
     Ingredient_count = db.Column(db.Integer)
     Hero_Ing = db.Column(db.String(255))
     Veg_Nonveg = db.Column(db.String(225))
-    Is_veg = db.Column(db.Boolean, nullable=False)
+    Is_veg = db.Column(db.Integer, nullable=False)

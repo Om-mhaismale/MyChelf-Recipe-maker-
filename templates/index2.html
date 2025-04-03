@@ -16,6 +16,12 @@
         <input type="text" id="search-box" placeholder="Enter an ingredient or recipe name">
         <button onclick="searchRecipe()">Search</button>
 
+        <select id="veg-filter">
+            <option value="all">All</option>
+            <option value="veg">Veg</option>
+            <option value="nonveg">Non-Veg</option>
+        </select>
+
         <!-- Placeholder Image -->
         <img id="placeholder-image" class="placeholder-image" src="{{ url_for('static', filename='recipe_image-removebg-preview.png') }}" alt="Placeholder Image">
 
@@ -25,6 +31,7 @@
         <!-- Load More Button -->
         <button id="load-more" onclick="loadMore()" style="display: none;">More Recipes</button>
     </div>
+
 
     <script>
         let query = "";
@@ -45,7 +52,8 @@
         }
 
         function fetchRecipes() {
-            fetch(`/search?query=${query}&offset=${offset}&limit=${limit}`)
+            let vegFilter = document.getElementById("veg-filter").value; // Get value of fliter from user
+            fetch(`/search?query=${query}&offset=${offset}&limit=${limit}&veg_filter=${vegFilter}`)
                 .then(response => response.json())
                 .then(data => {
                     let resultsDiv = document.getElementById("results");
@@ -59,6 +67,7 @@
                                     <h3>${recipe.name}</h3>
                                     <p><strong>Ingredients:</strong> ${recipe.ingredients}</p>
                                     <p><strong>Cuisine:</strong> ${recipe.cuisine}</p>
+                                    <p><strong>Type:</strong> ${recipe.Is_veg}</p>
                                     <a href="${recipe.url}" target="_blank">View Recipe</a>
                                 </div>
                             `;

@@ -8,18 +8,29 @@ def search():
     query = request.args.get('query', '').strip().lower()
     offset = int(request.args.get('offset', 0))
     limit = int(request.args.get('limit', 10))
+    veg_filter = request.args.get('veg_filter', 'all')  # Get veg/nonveg filter
 
     if not query:
         return jsonify({"error": "Please provide a search query."}), 400
 
     # Query with pagination
-    results = Recipe.query.with_entities(
+    recipe_query = Recipe.query.with_entities(
         Recipe.TranslatedRecipeName, Recipe.image_url, Recipe.Cuisine, 
-        Recipe.TotalTimeInMins, Recipe.Ingredient_count, Recipe.URL, Recipe.Cleaned_Ingredients
+        Recipe.TotalTimeInMins, Recipe.Ingredient_count, Recipe.URL, Recipe.Cleaned_Ingredients,
+        Recipe.Is_veg
     ).filter(
         (Recipe.Cleaned_Ingredients.like(f"%{query}%")) | 
         (Recipe.Hero_Ing.like(f"%{query}%"))
-    ).offset(offset).limit(limit).all()
+    )#.offset(offset).limit(limit).all() for testing purpose
+
+    #Applying Veg/Nonveg filter
+    if veg_filter == "veg":
+        recipe_query = recipe_query.filter(Recipe.Is_veg == 1)
+    elif veg_filter == "nonveg":
+        recipe_query = recipe_query.filter(Recipe.Is_veg == 0)
+    
+    # Apply pagination
+    results = recipe_query.offset(offset).limit(limit).all()
 
     if not results:
         return jsonify({"message": "No more recipes found."}), 404
@@ -32,7 +43,8 @@ def search():
             "ingredients_count": r.Ingredient_count,
             "url": r.URL,
             "image_url": r.image_url,
-            "ingredients": r.Cleaned_Ingredients  
+            "ingredients": r.Cleaned_Ingredients,
+            "Is_veg": "Veg" if r.Is_veg == 1 else "Non-Veg"   
         } for r in results
     ]
 
