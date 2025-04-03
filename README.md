@@ -30,6 +30,7 @@ Follow these steps to set up MyChelf on your local development environment:
    ```
    pip install flask
    pip install flask-sqlalchemy
+   pip install mysql-connector-python
    ```
 
 5. **Run the Application:**
