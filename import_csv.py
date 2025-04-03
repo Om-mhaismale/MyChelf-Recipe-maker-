@@ -18,8 +18,8 @@ for _, row in df.iterrows():
     cursor.execute("""
         INSERT INTO recipes 
         (TranslatedRecipeName, TranslatedIngredients, TotalTimeInMins, Cuisine, 
-         TranslatedInstructions, URL, Cleaned_Ingredients, image_url, Ingredient_count, Hero_Ing, Veg_Nonveg) 
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s,%s, %s)
+         TranslatedInstructions, URL, Cleaned_Ingredients, image_url, Ingredient_count, Hero_Ing, Veg_Nonveg, Is_Veg) 
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s)
     """, tuple(row))
 
 conn.commit()

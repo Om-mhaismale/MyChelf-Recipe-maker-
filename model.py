@@ -15,3 +15,5 @@ class Recipe(db.Model):
     image_url = db.Column(db.String(255))
     Ingredient_count = db.Column(db.Integer)
     Hero_Ing = db.Column(db.String(255))
+    Veg_Nonveg = db.Column(db.String(225))
+    Is_veg = db.Column(db.Boolean, nullable=False)
