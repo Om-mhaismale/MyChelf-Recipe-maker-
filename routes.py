@@ -12,16 +12,32 @@ def search():
 
     if not query:
         return jsonify({"error": "Please provide a search query."}), 400
+    
+    # Convert query into a list of ingredients
+    ingredients_list = [ing.strip() for ing in query.split(",") if ing.strip()]
+
+    if not ingredients_list:
+        return jsonify({"error": "Invalid ingredient format."}), 400
 
     # Query with pagination
     recipe_query = Recipe.query.with_entities(
         Recipe.TranslatedRecipeName, Recipe.image_url, Recipe.Cuisine, 
         Recipe.TotalTimeInMins, Recipe.Ingredient_count, Recipe.URL, Recipe.Cleaned_Ingredients,
         Recipe.Is_veg
-    ).filter(
-        (Recipe.Cleaned_Ingredients.like(f"%{query}%")) | 
-        (Recipe.Hero_Ing.like(f"%{query}%"))
-    )#.offset(offset).limit(limit).all() for testing purpose
+    )#.filter(
+      #  (Recipe.Cleaned_Ingredients.like(f"%{query}%")) | 
+       # (Recipe.Hero_Ing.like(f"%{query}%"))
+    #)#.offset(offset).limit(limit).all() for testing purpose
+
+    # Filter by each ingredient (AND logic)
+    for ing in ingredients_list:
+        recipe_query = recipe_query.filter(
+            db.or_(
+                Recipe.Cleaned_Ingredients.like(f"%{ing}%"),
+                Recipe.Hero_Ing.like(f"%{ing}%")
+            )
+        )
+
 
     #Applying Veg/Nonveg filter
     if veg_filter == "veg":
