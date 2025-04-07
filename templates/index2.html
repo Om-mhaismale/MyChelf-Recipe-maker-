@@ -13,10 +13,10 @@
     </header>
 
     <div class="container">
-        <input type="text" id="search-box" placeholder="Enter an ingredient or recipe name">
+        <input type="text" id="search-box" placeholder="Enter an ingredient or recipe name" onkeypress="handleKeyPress(event)">
         <button onclick="searchRecipe()">Search</button>
 
-        <select id="veg-filter">
+        <select id="veg-filter" onchange="handleFilterChange()">
             <option value="all">All</option>
             <option value="veg">Veg</option>
             <option value="nonveg">Non-Veg</option>
@@ -38,18 +38,21 @@
         let offset = 0; // Track how many results have been loaded
         const limit = 10; // Number of recipes per request
 
-        /*function searchRecipe() {
-            query = document.getElementById("search-box").value;
-            offset = 0;
-            document.getElementById("results").innerHTML = "";
-            fetchRecipes();
-
-            // Hide the placeholder image when searching
-            const placeholderImage = document.getElementById("placeholder-image");
-            if (placeholderImage) {
-                placeholderImage.style.display = "none";
+        // Add this new function to handle filter changes
+        function handleFilterChange() {
+            if (query) {  // Only search if there's an existing query
+                offset = 0;  // Reset offset when filter changes
+                document.getElementById("results").innerHTML = "";  // Clear previous results
+                fetchRecipes();
             }
-        }*/
+        }
+
+        // Add this new function to handle Enter key press
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                searchRecipe();
+            }
+        }
 
         function searchRecipe() {
             query = document.getElementById("search-box").value.trim();
