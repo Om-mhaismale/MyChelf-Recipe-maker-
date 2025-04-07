@@ -7,36 +7,217 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
 </head>
 <body>
-    <!-- Stylish Header -->
-    <header>
-        <h1>MyChelf 🍽️</h1>
-    </header>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>MyChelf</h2>
+        </div>
+        <div class="sidebar-content">
+            <div class="filter-section">
+                <h3>Filter Recipes</h3>
+                <select id="veg-filter" onchange="handleFilterChange()">
+                    <option value="all">All Recipes</option>
+                    <option value="veg">Vegetarian</option>
+                    <option value="nonveg">Non-Vegetarian</option>
+                </select>
+            </div>
 
-    <div class="container">
-        <input type="text" id="search-box" placeholder="Enter an ingredient or recipe name" onkeypress="handleKeyPress(event)">
-        <button onclick="searchRecipe()">Search</button>
+            <div class="exclude-section">
+                <h3>Exclude Ingredients</h3>
+                <input type="text" id="exclude-ingredients" placeholder="Enter ingredients to exclude (comma separated)" onkeypress="handleExcludeKeyPress(event)">
+                <div class="excluded-tags" id="excluded-tags"></div>
+            </div>
 
-        <select id="veg-filter" onchange="handleFilterChange()">
-            <option value="all">All</option>
-            <option value="veg">Veg</option>
-            <option value="nonveg">Non-Veg</option>
-        </select>
+            <div class="suggestions-section">
+                <h3>Common Ingredients</h3>
+                
+                <div class="ingredient-category">
+                    <h4>Proteins</h4>
+                    <div class="ingredients-list">
+                        <div class="ingredient-tag" onclick="addToSearch('chicken')">Chicken</div>
+                        <div class="ingredient-tag" onclick="addToSearch('egg')">Egg</div>
+                        <div class="ingredient-tag" onclick="addToSearch('fish')">Fish</div>
+                        <div class="ingredient-tag" onclick="addToSearch('Soybean')">Soybean</div>
+                        <div class="ingredient-tag" onclick="addToSearch('tofu')">Tofu</div>
+                    </div>
+                </div>
 
-        <!-- Placeholder Image -->
-        <img id="placeholder-image" class="placeholder-image" src="{{ url_for('static', filename='recipe_image-removebg-preview.png') }}" alt="Placeholder Image">
+                <div class="ingredient-category">
+                    <h4>Grains & Pasta</h4>
+                    <div class="ingredients-list">
+                        <div class="ingredient-tag" onclick="addToSearch('rice')">Rice</div>
+                        <div class="ingredient-tag" onclick="addToSearch('pasta')">Pasta</div>
+                        <div class="ingredient-tag" onclick="addToSearch('bread')">Bread</div>
+                        <div class="ingredient-tag" onclick="addToSearch('quinoa')">Quinoa</div>
+                    </div>
+                </div>
 
-        <!-- Recipe Grid -->
-        <div class="grid-container" id="results"></div>
+                <div class="ingredient-category">
+                    <h4>Vegetables</h4>
+                    <div class="ingredients-list">
+                        <div class="ingredient-tag" onclick="addToSearch('potato')">Potato</div>
+                        <div class="ingredient-tag" onclick="addToSearch('tomato')">Tomato</div>
+                        <div class="ingredient-tag" onclick="addToSearch('onion')">Onion</div>
+                        <div class="ingredient-tag" onclick="addToSearch('garlic')">Garlic</div>
+                        <div class="ingredient-tag" onclick="addToSearch('mushroom')">Mushroom</div>
+                        <div class="ingredient-tag" onclick="addToSearch('carrot')">Carrot</div>
+                        <div class="ingredient-tag" onclick="addToSearch('bell pepper')">Bell Pepper</div>
+                    </div>
+                </div>
 
-        <!-- Load More Button -->
-        <button id="load-more" onclick="loadMore()" style="display: none;">More Recipes</button>
+                <div class="ingredient-category">
+                    <h4>Dairy</h4>
+                    <div class="ingredients-list">
+                        <div class="ingredient-tag" onclick="addToSearch('cheese')">Cheese</div>
+                        <div class="ingredient-tag" onclick="addToSearch('milk')">Milk</div>
+                        <div class="ingredient-tag" onclick="addToSearch('yogurt')">Yogurt</div>
+                        <div class="ingredient-tag" onclick="addToSearch('cream')">Cream</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Stylish Header -->
+        <header>
+            <h1>MyChelf 🍽️</h1>
+        </header>
+
+        <div class="container">
+            <input type="text" id="search-box" placeholder="Enter an ingredient or recipe name" onkeypress="handleKeyPress(event)" autofocus>
+            <button onclick="searchRecipe()">Search</button>
+
+            <!-- Placeholder Image -->
+            <img id="placeholder-image" class="placeholder-image" src="{{ url_for('static', filename='recipe_image-removebg-preview.png') }}" alt="Placeholder Image">
+
+            <!-- Recipe Grid -->
+            <div class="grid-container" id="results"></div>
+
+            <!-- Load More Button -->
+            <button id="load-more" onclick="loadMore()" style="display: none;">More Recipes</button>
+        </div>
+    </div>
 
     <script>
         let query = "";
         let offset = 0; // Track how many results have been loaded
         const limit = 10; // Number of recipes per request
+        let selectedIngredients = new Set(); // Track selected ingredients
+        let excludedIngredients = new Set(); // Track excluded ingredients
+
+        // Function to handle Enter key press in exclude input
+        function handleExcludeKeyPress(event) {
+            if (event.key === 'Enter') {
+                const excludeInput = document.getElementById("exclude-ingredients");
+                const ingredients = excludeInput.value.split(',').map(ing => ing.trim()).filter(ing => ing);
+                
+                ingredients.forEach(ingredient => {
+                    if (!excludedIngredients.has(ingredient)) {
+                        excludedIngredients.add(ingredient);
+                        addExcludedTag(ingredient);
+                    }
+                });
+                
+                excludeInput.value = '';
+                if (query) {
+                    fetchRecipes();
+                }
+            }
+        }
+
+        // Function to add excluded tag
+        function addExcludedTag(ingredient) {
+            const excludedTagsDiv = document.getElementById("excluded-tags");
+            const tag = document.createElement("div");
+            tag.className = "excluded-tag";
+            tag.innerHTML = `
+                ${ingredient}
+                <span class="remove-tag" onclick="removeExcludedIngredient('${ingredient}')">×</span>
+            `;
+            excludedTagsDiv.appendChild(tag);
+        }
+
+        // Function to remove excluded ingredient
+        function removeExcludedIngredient(ingredient) {
+            excludedIngredients.delete(ingredient);
+            const tags = document.querySelectorAll('.excluded-tag');
+            tags.forEach(tag => {
+                // Get only the ingredient text without the 'x' button
+                const tagText = tag.childNodes[0].textContent.trim();
+                if (tagText === ingredient) {
+                    tag.remove();
+                }
+            });
+            
+            // Clear current results and reset offset
+            offset = 0;
+            document.getElementById("results").innerHTML = "";
+            
+            // Show placeholder image if no search query
+            const placeholderImage = document.getElementById("placeholder-image");
+            if (!query) {
+                if (placeholderImage) {
+                    placeholderImage.style.display = "block";
+                }
+            } else {
+                if (placeholderImage) {
+                    placeholderImage.style.display = "none";
+                }
+                // Fetch new results if there's an active search
+                fetchRecipes();
+            }
+        }
+
+        // Function to add ingredient to search bar
+        function addToSearch(ingredient) {
+            // Check if ingredient is in excluded list
+            if (excludedIngredients.has(ingredient)) {
+                alert(`"${ingredient}" is in your excluded ingredients list. Please remove it from excluded ingredients first.`);
+                return;
+            }
+
+            const searchBox = document.getElementById("search-box");
+            const currentValue = searchBox.value.trim();
+            const ingredients = currentValue ? currentValue.split(',').map(ing => ing.trim()) : [];
+            
+            // Toggle ingredient selection
+            const ingredientTags = document.querySelectorAll(`.ingredient-tag[onclick="addToSearch('${ingredient}')"]`);
+            
+            if (selectedIngredients.has(ingredient)) {
+                // Remove ingredient
+                selectedIngredients.delete(ingredient);
+                const index = ingredients.indexOf(ingredient);
+                if (index > -1) {
+                    ingredients.splice(index, 1);
+                }
+                ingredientTags.forEach(tag => tag.classList.remove('selected'));
+            } else {
+                // Add ingredient
+                selectedIngredients.add(ingredient);
+                if (!ingredients.includes(ingredient)) {
+                    ingredients.push(ingredient);
+                }
+                ingredientTags.forEach(tag => tag.classList.add('selected'));
+            }
+            
+            // Update search box
+            searchBox.value = ingredients.join(", ");
+            
+            // Focus back on search box
+            searchBox.focus();
+        }
+
+        // Function to clear all selections when search box is cleared
+        document.getElementById("search-box").addEventListener('input', function(e) {
+            if (!e.target.value.trim()) {
+                selectedIngredients.clear();
+                document.querySelectorAll('.ingredient-tag').forEach(tag => {
+                    tag.classList.remove('selected');
+                });
+            }
+        });
 
         // Add this new function to handle filter changes
         function handleFilterChange() {
@@ -70,6 +251,13 @@
                 return;
             }
 
+            // Check if any ingredient is in excluded list
+            const excludedInSearch = ingredients.filter(ing => excludedIngredients.has(ing));
+            if (excludedInSearch.length > 0) {
+                alert(`The following ingredients are in your excluded list: ${excludedInSearch.join(', ')}. Please remove them from excluded ingredients first.`);
+                return;
+            }
+
             // Reset offset and clear previous results
             offset = 0;
             document.getElementById("results").innerHTML = "";
@@ -87,8 +275,9 @@
 
 
         function fetchRecipes() {
-            let vegFilter = document.getElementById("veg-filter").value; // Get value of fliter from user
-            fetch(`/search?query=${query}&offset=${offset}&limit=${limit}&veg_filter=${vegFilter}`)
+            let vegFilter = document.getElementById("veg-filter").value;
+            let excludeQuery = Array.from(excludedIngredients).join(',');
+            fetch(`/search?query=${query}&offset=${offset}&limit=${limit}&veg_filter=${vegFilter}&exclude=${excludeQuery}`)
                 .then(response => response.json())
                 .then(data => {
                     let resultsDiv = document.getElementById("results");
@@ -98,12 +287,14 @@
                         data.recipes.forEach(recipe => {
                             resultsDiv.innerHTML += `
                                 <div class="recipe-card">
-                                    <img src="${recipe.image_url}" alt="Recipe Image">
-                                    <h3>${recipe.name}</h3>
-                                    <p><strong>Ingredients:</strong> ${recipe.ingredients}</p>
-                                    <p><strong>Cuisine:</strong> ${recipe.cuisine}</p>
-                                    <p><strong>Type:</strong> ${recipe.Is_veg}</p>
-                                    <a href="${recipe.url}" target="_blank">View Recipe</a>
+                                    <img src="${recipe.image_url}" alt="${recipe.name}">
+                                    <div class="content">
+                                        <h3>${recipe.name}</h3>
+                                        <p><strong>Ingredients:</strong> ${recipe.ingredients}</p>
+                                        <p><strong>Cuisine:</strong> ${recipe.cuisine}</p>
+                                        <p><strong>Type:</strong> ${recipe.Is_veg}</p>
+                                        <a href="${recipe.url}" target="_blank">View Recipe</a>
+                                    </div>
                                 </div>
                             `;
                         });
@@ -113,7 +304,7 @@
                         if (offset === 0) {
                             resultsDiv.innerHTML = `<img id="no-recipe" class="no-recipe" src="{{ url_for('static', filename='no_recipes_olive.png') }}" alt="No Recipes Found">`;
                         }
-                        loadMoreButton.style.display = "none"; // Hide the button if no recipes are found
+                        loadMoreButton.style.display = "none";
                     }
                 });
         }
