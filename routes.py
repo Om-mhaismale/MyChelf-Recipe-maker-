@@ -9,12 +9,15 @@ def search():
     offset = int(request.args.get('offset', 0))
     limit = int(request.args.get('limit', 10))
     veg_filter = request.args.get('veg_filter', 'all')  # Get veg/nonveg filter
+    exclude = request.args.get('exclude', '')  # Get excluded ingredients
 
     if not query:
         return jsonify({"error": "Please provide a search query."}), 400
     
     # Convert query into a list of ingredients
     ingredients_list = [ing.strip() for ing in query.split(",") if ing.strip()]
+    # Convert excluded ingredients into a list
+    excluded_ingredients = [ing.strip() for ing in exclude.split(",") if ing.strip()]
 
     if not ingredients_list:
         return jsonify({"error": "Invalid ingredient format."}), 400
@@ -24,10 +27,7 @@ def search():
         Recipe.TranslatedRecipeName, Recipe.image_url, Recipe.Cuisine, 
         Recipe.TotalTimeInMins, Recipe.Ingredient_count, Recipe.URL, Recipe.Cleaned_Ingredients,
         Recipe.Is_veg
-    )#.filter(
-      #  (Recipe.Cleaned_Ingredients.like(f"%{query}%")) | 
-       # (Recipe.Hero_Ing.like(f"%{query}%"))
-    #)#.offset(offset).limit(limit).all() for testing purpose
+    )
 
     # Filter by each ingredient (AND logic)
     for ing in ingredients_list:
@@ -38,6 +38,14 @@ def search():
             )
         )
 
+    # Exclude recipes that contain any of the excluded ingredients
+    for excluded_ing in excluded_ingredients:
+        recipe_query = recipe_query.filter(
+            db.and_(
+                ~Recipe.Cleaned_Ingredients.like(f"%{excluded_ing}%"),
+                ~Recipe.Hero_Ing.like(f"%{excluded_ing}%")
+            )
+        )
 
     #Applying Veg/Nonveg filter
     if veg_filter == "veg":
